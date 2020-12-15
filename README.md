@@ -11,10 +11,10 @@ import pprint
 import requests
 
 payload = {
-    "sepal_length_cm": 1,
-    "sepal_width_cm": 2,
-    "petal_length_cm": 3,
-    "petal_width_cm": 4
+    "sepal_length_cm": 5.1,
+    "sepal_width_cm": 3.5,
+    "petal_length_cm": 1.4,
+    "petal_width_cm": 0.2
 }
 
 resp = requests.post("https://my-cloud-run-url/predict", json=payload)
@@ -25,19 +25,20 @@ Outputs:
 ```python
 {'predictions': [{'class_name': 'Iris Setosa',
                   'class_no': 0,
-                  'score': -0.07042217254638672},
+                  'score': 0.9766749739646912},
                  {'class_name': 'Iris Versicolour',
                   'class_no': 1,
-                  'score': -2.1902551651000977},
+                  'score': 0.023324977606534958},
                  {'class_name': 'Iris Virginica',
                   'class_no': 2,
-                  'score': 2.2606773376464844}]}
+                  'score': 6.551524478481952e-08}]}
 ```
 
-## Tests
+## QA
 
 * [Tox](https://tox.readthedocs.io/en/latest/) is used to orchestrate the tests.
 * The `dev-requirements.txt` file contains useful libraries for managing the code.
+* A [pre-commit](https://pre-commit.com/) config is provided to help enforce code quality tooling.
 
 ## Improvements
 
