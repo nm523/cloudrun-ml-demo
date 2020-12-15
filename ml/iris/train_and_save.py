@@ -20,10 +20,7 @@ clr.fit(X_train, y_train)
 
 # Convert into ONNX format
 initial_type = [("float_input", FloatTensorType([None, 4]))]
-options = {
-    id(clr): {"raw_scores": True}
-}  # Slightly different from the tutorial, allow the API to export raw scores.
-onx = convert_sklearn(clr, initial_types=initial_type, options=options)
+onx = convert_sklearn(clr, initial_types=initial_type)
 with open("model.onnx", "wb") as f:
     f.write(onx.SerializeToString())
 
@@ -31,4 +28,7 @@ with open("model.onnx", "wb") as f:
 sess = rt.InferenceSession("model.onnx")
 input_name = sess.get_inputs()[0].name
 label_name = sess.get_outputs()[0].name
-pred_onx = sess.run([label_name], {input_name: X_test.astype(numpy.float32)})[0]
+output_probability = sess.get_outputs()[1].name
+pred_onx = sess.run(
+    [label_name, output_probability], {input_name: X_test.astype(numpy.float32)}
+)
