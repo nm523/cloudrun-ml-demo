@@ -6,7 +6,7 @@ For example, this could be configuring and registering middleware.
 import falcon
 from onnxruntime.capi.onnxruntime_inference_collection import InferenceSession
 
-from .model import IrisResource
+from .iris import IrisResource
 
 
 class Factory:
@@ -17,8 +17,8 @@ class Factory:
         self.model_session = model_session
 
     def _register_middleware(self) -> None:
-        """Registers middleware."""
-        return
+        """Registers middleware like SQL database connections."""
+        pass
 
     def _register_routes(self) -> None:
         """Registers resources against routes for the application."""

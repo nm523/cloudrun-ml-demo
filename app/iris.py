@@ -1,13 +1,18 @@
-"""Machine learning model resource.
+"""Iris model resource.
+
+Iris is the canoncial example dataset used for
+machine learning. The aim is to classify use
+four attributes to classify which type of Iris
+plant is used (Setosa, Versicolour, Virginica):
 
 1. sepal length in cm
 2. sepal width in cm
 3. petal length in cm
 4. petal width in cm
-5. class:
--- Iris Setosa
--- Iris Versicolour
--- Iris Virginica
+
+This file contains a Falcon resource that allows
+a user to submit flower measurements via HTTP and
+get a prediction back.
 """
 from typing import Any, Dict, List, Union
 
@@ -37,7 +42,7 @@ IRIS_RESPONSE_SCHEMA = {
                 "class_name": {"type": "string"},
                 "score": {"type": "number"},
             },
-        }
+        },
     },
 }
 """Dict: Output Schema for the Iris model."""
@@ -61,15 +66,15 @@ class IrisResource:
         req_schema=IRIS_REQUEST_SCHEMA, resp_schema=IRIS_RESPONSE_SCHEMA
     )
     def on_post(self, req: falcon.Request, resp: falcon.Response) -> None:
-        """For an input."""
-        resp.media = {"predictions": self._predict_and_marshall(req.media)}
+        """Send some data, get a prediction back."""
+        resp.media = {"predictions": self._predict_and_marshal(req.media)}
         resp.status = falcon.HTTP_OK
 
     @staticmethod
     def _convert_dict_to_ordered_array(
         input_dict: Dict[Any, Any], keys: List[str]
     ) -> np.array:
-        """Converts the input dictionary to an ordered array before passing to the ONNX session.
+        """Converts the input dictionary to an ordered array before predictions.
 
         Args:
             input_dict: The input dictionary to convert.
@@ -78,16 +83,16 @@ class IrisResource:
         return np.array([[input_dict[key] for key in keys]], dtype=np.float32)
 
     @staticmethod
-    def _marshall_predictions(
-        prediction: Dict[int, str]
+    def _marshal_predictions(
+        prediction: Dict[int, float]
     ) -> List[Dict[str, Union[str, float, int]]]:
-        """Format the predictions into a list of results for the client to receive."""
+        """Format the predictions for the client to receive."""
         return [
             {"class_no": class_no, "class_name": IRIS_CLASSES[class_no], "score": score}
             for class_no, score in prediction.items()
         ]
 
-    def _predict(self, dimensions: Dict[str, float]) -> Dict[str, Any]:
+    def _predict(self, dimensions: Dict[str, float]) -> Dict[int, float]:
         """Make a prediction for one input only."""
         # Make sure the inputs are going in in the correct order.
         model_inputs = self._convert_dict_to_ordered_array(
@@ -97,7 +102,9 @@ class IrisResource:
         # Select the raw scores (probabilities) prior to formatting them.
         return self.model_session.run(None, {self.input_name: model_inputs})[1][0]
 
-    def _predict_and_marshall(self, dimensions: Dict[str, float]) -> Dict[str, Any]:
+    def _predict_and_marshal(
+        self, dimensions: Dict[str, float]
+    ) -> List[Dict[str, Union[str, float, int]]]:
         """Predicts the result and formats it for returning to the client."""
         prediction = self._predict(dimensions)
-        return self._marshall_predictions(prediction)
+        return self._marshal_predictions(prediction)
