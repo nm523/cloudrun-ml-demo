@@ -2,6 +2,9 @@ FROM python:3.8-slim-buster
 
 WORKDIR /app
 
+# Allow statements and log messages to immediately appear in the Knative logs
+ENV PYTHONUNBUFFERED True
+
 # Install the requirements.
 COPY requirements.txt .
 RUN ["pip", "install", "-r", "requirements.txt"]
@@ -16,5 +19,5 @@ ENV IRIS_ONNX_MODEL_PATH=/app/model.onnx
 # Copy over the gunicorn configuration last.
 COPY gunicorn.conf.py gunicorn.conf.py
 
-EXPOSE 8000
+EXPOSE 8080
 ENTRYPOINT [ "gunicorn", "app.main:api" ]
